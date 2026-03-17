@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Caricamento...</title>
+    <style>
+        /* =====================
+           RESET & BASE
+        ===================== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 16px; scroll-behavior: smooth; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                         "Segoe UI", Roboto, "Open Sans", Arial, sans-serif;
+            color: #0f172a;
+            background: /* #a2c08d; */ linear-gradient(160deg, #3e793d 0%, #b5e2b5 100%);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            justify-content: center;
+        }
+        .page-wrapper { width: 100%; max-width: 900px; padding: 20px 16px 40px; }
+
+        /* =====================
+           TIPOGRAFIA
+        ===================== */
+        h1, h2, h3, h4 { line-height: 1.25; margin-bottom: 0.75em; font-weight: 700; color: #166534; }
+        h1 { font-size: 1.9rem; margin-top: 0.4rem; }
+        h2 { font-size: 1.45rem; }
+        h3 { font-size: 1.25rem; }
+        h4 { font-size: 1.05rem; margin-top: 1em; }
+        p { margin-bottom: 0.9em; font-size: 1rem; }
+        code {
+            font-family: "Fira Code", "JetBrains Mono", Menlo, Consolas, monospace;
+            font-size: 0.95em; background: #d9f2df;
+            padding: 2px 6px; border-radius: 4px;
+        }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover, a:focus-visible { text-decoration: underline; }
+        em { font-style: normal; font-weight: 600; }
+
+/* =====================
+   SCALA DIFFICOLTÀ
+===================== */
+.difficulty-bar {
+    margin: 16px 0;
+}
+.diff-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 6px;
+    display: block;
+}
+.diff-track {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+.diff-step {
+    flex: 1;
+    height: 28px;
+    border-radius: 6px;
+    background: #e5e7eb;
+    border: 2px solid transparent;
+    cursor: default;          /* readonly — cambia in pointer se vuoi interattivo */
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.85);
+}
+.diff-step.active {
+    transform: scaleY(1.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.diff-step.filled-0 { background: #4ade80; }
+.diff-step.filled-1 { background: #22c55e; }
+.diff-step.filled-2 { background: #84cc16; }
+.diff-step.filled-3 { background: #eab308; }
+.diff-step.filled-4 { background: #f97316; }
+.diff-step.filled-5 { background: #ef4444; }
+.diff-step.filled-6 { background: #dc2626; }
+.diff-step.filled-7 { background: #b91c1c; }
+.diff-step.filled-8 { background: #7f1d1d; }
+
+.diff-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+.diff-text {
+    text-align: center;
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-top: 4px;
+    color: #166534;
+}
+
+        /* =====================
+           LISTE
+        ===================== */
+        ul { list-style-type: none; margin-left: 0; margin-bottom: 0.5em; }
+        ol { padding-left: 1.2em; margin-bottom: 1em; }
+        li { margin: 0.3em 0; padding-left: 1.4em; position: relative; }
+        ul li::before { content: "•"; position: absolute; left: 0; top: 0; color: #16a34a; font-weight: 900; }
+        ol li { padding-left: 0; }
+
+        /* =====================
+           CARD / SEZIONI
+        ===================== */
+        .section {
+            margin-bottom: 24px; padding: 18px 18px 20px;
+            background: #ffffff; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+            border: 1px solid rgba(15,23,42,0.04);
+        }
+
+        /* =====================
+           BADGE
+        ===================== */
+        .badge {
+            display: inline-flex; align-items: center;
+            padding: 2px 10px; border-radius: 999px;
+            font-size: 0.8rem; font-weight: 600;
+            background: #dcfce7; color: #166534;
+        }
+
+        /* =====================
+           IFRAME / GRID
+        ===================== */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .iframe-container {
+            position: relative; width: 100%;
+            padding-top: 56.25%; border-radius: 12px;
+            overflow: hidden; background: #e5e7eb;
+            box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06);
+        }
+        .iframe-container iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+        .iframe-label {
+            text-align: center; font-size: 0.8rem; color: #6b7280;
+            margin-top: 6px; margin-bottom: 4px;
+        }
+
+        /* =====================
+           HEADER / FOOTER
+        ===================== */
+        .page-header { text-align: left; margin-bottom: 40px; }
+        .page-header h1 { margin-bottom: 0.2em; }
+        .page-header h1 { color: #cef7da; }
+        .page-header h2 { margin-top: 0; font-weight: 500; color: #cef7da; }
+        footer.page-footer {
+            text-align: center; margin-top: 32px; padding: 16px 12px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ffffff; border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(22,163,74,0.35); font-size: 0.95rem;
+        }
+        footer.page-footer a { color: #dcfce7; }
+        code {
+            background: rgba(18, 47, 33, 0.424);  /* ← cambia questo */
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+
+        /* =====================
+           ALERT
+        ===================== */
+        .alert {
+            border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;
+            font-size: 0.95rem; display: flex; gap: 8px; align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .alert-icon { font-size: 1.1rem; line-height: 1.4; }
+        .alert-info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+        .alert-warning { background: #fef3c7; border: 1px solid #fde68a; color: #92400e; }
+        .alert-danger  { background: #fee2e2; border: 1px solid #fecaca; color: #b91c1c; }
+
+        /* =====================
+           BOTTONI
+        ===================== */
+        .button {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 8px 14px; border-radius: 999px; border: none;
+            cursor: pointer; font-size: 0.95rem; font-weight: 600;
+            background: #16a34a; color: #ffffff;
+            box-shadow: 0 4px 10px rgba(22,163,74,0.35);
+            transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+            text-decoration: none;
+        }
+        .button:hover { background: #15803d; transform: translateY(-1px); box-shadow: 0 6px 14px rgba(22,163,74,0.45); }
+        .button:active { transform: translateY(0); box-shadow: 0 3px 8px rgba(22,163,74,0.35); }
+
+        /* =====================
+           LOADING / ERRORE
+        ===================== */
+        #loading { text-align: center; padding: 60px 20px; font-size: 1.2rem; color: #166534; }
+        #error-msg { display: none; }
+
+        /* =====================
+           RESPONSIVE
+        ===================== */
+        @media (max-width: 768px) {
+            .page-wrapper { padding: 16px 10px 32px; }
+            .section { padding: 14px 14px 16px; }
+            h1 { font-size: 1.6rem; }
+            h2 { font-size: 1.3rem; }
+            h3 { font-size: 1.15rem; }
+            .form-embed { padding-top: 130%; }
+        }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+        a:focus-visible, button:focus-visible, iframe:focus-visible {
+            outline: 3px solid #2563eb; outline-offset: 3px;
+        }
+    </style>
+    <!-- Carica il file di configurazione -->
+    <script src="config.js"></script>
+</head>
+<body>
+<div class="page-wrapper">
+
+    <!-- Loading state -->
+    <div id="loading">🌲 Caricamento escursione...</div>
+
+    <!-- Errore config.json mancante -->
+    <div id="error-msg" class="section">
+        <div class="alert alert-danger">
+            <span class="alert-icon">❌</span>
+            <strong>Errore:</strong> impossibile caricare <code>config.json</code>.
+            Assicurati che il file sia nella stessa cartella di index.html.
+        </div>
+    </div>
+
+    <!-- Contenuto dinamico — popolato da JS -->
+    <div id="content" style="display:none;">
+
+        <header class="page-header">
+            <h1>Hiking – <code id="c-data"></code></h1>
+            <h2 id="c-titolo"></h2>
+        </header>
+
+        <!-- PROGRAMMA -->
+        <div class="section">
+            <h3>Programma</h3>
+            <p>📍 Punto di incontro: <em id="c-incontro"></em>
+                <a id="c-incontro-link" href="#" target="_blank" rel="noopener">🗺️ Apri mappa</a>
+            </p>
+            <p>🕣 Ore: <em id="c-ora-ritrovo"></em></p>
+            <p>🚗 Partenza: <em id="c-ora-partenza"></em></p>
+            <p>🗺️ Tragitto in macchina: <em id="c-durata-trasferimento"></em></p>
+            <p>🅿️ Punto di arrivo: <em id="c-parcheggio-label"></em>
+            <a id="c-parcheggio-link" href="#" target="_blank" rel="noopener">🗺️ Apri mappa</a></p>
+            <p>🥾 Inizio trekking: <em id="c-ora-trekking"></em></p>
+            
+<div class="grid" style="margin-top: 12px;">
+    <div>
+        <div class="iframe-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2190.390875680228!2d13.3642298!3d38.0879172!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1319e57a56ebcd0b%3A0x2d868dd0c560bd41!2sche%20Bont%C3%A0%20BAR%20%7C%20Torre%20Bonagia%201!5e1!3m2!1sit!2sit!4v1773707565394!5m2!1sit!2sit"
+                    loading="lazy" allowfullscreen=""></iframe>
+        </div>
+        <p class="iframe-label">📍 <span id="c-incontro-label"></span>
+            &nbsp;<a id="c-incontro-link-mappa" href="#" target="_blank">Partenza</a>
+        </p>
+    </div>
+    <div>
+        <div class="iframe-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d2292.073133664365!2d13.377486!3d37.882795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzfCsDUyJzU4LjEiTiAxM8KwMjInMzkuMCJF!5e1!3m2!1sit!2sit!4v1773706423639!5m2!1sit!2sit"
+                    loading="lazy" allowfullscreen=""></iframe>
+        </div>
+        <p class="iframe-label">🅿️ <span id="c-parcheggio-label-mappa"></span>
+            &nbsp;<a id="c-parcheggio-link-mappa" href="#" target="_blank">Arrivo</a>
+        </p>
+    </div>
+</div>
+
+            <br>
+            <p>Si raccomanda una buona colazione, il punto di ritrovo al bar consente a chi ne avesse bisogno di
+            consumare qualcosa. I partecipanti verranno con mezzi propri,
+            sotto responsabilità di ciascun partecipante.</p>
+                        <div class="alert alert-info" style="margin-top:12px">
+                <span class="alert-icon">ℹ️</span>
+                In caso di meteo sfavorevole l'escursione potrà essere rinviata o annullata a discrezione dell'organizzatore.
+            </div>
+        </div>
+
+        <!-- PERCORSO 🔗 -->
+        <div class="section">
+            <h3>Percorso</h3>
+            <ul id="c-dati"></ul>
+            <br>
+
+            <div class="difficulty-bar">
+    <span class="diff-label">Scala di difficoltà (0–8)</span>
+    <div class="diff-track" id="c-diff-track"></div>
+    <div class="diff-footer">
+        <span>Facile</span>
+        <span>Impegnativo</span>
+        <span>Estremo</span>
+    </div>
+    <div class="diff-text" id="c-difficolta-text"></div>
+</div>
+
+<p>Il percorso parte dal paese di Ficuzza</p>
+            <br>
+            <p><a id="c-osmand-link" href="#" target="_blank" rel="noopener">🗺️ Traccia OsmAnd completa</a></p>
+            <p> <a id="c-difficolta-link" href="c-difficolta-link" target="_blank" rel="noopener">
+                📊 Come valutiamo le difficoltà?</a></p>
+        </div>
+
+        <!-- EQUIPAGGIAMENTO -->
+        <div class="section">
+            <h3>Equipaggiamento obbligatorio</h3>
+            <ul id="c-equipaggiamento"></ul>
+            <div class="alert alert-warning">
+                <span class="alert-icon">⚠️</span>
+                L'organizzatore verificherà l'attrezzatura e potrà escludere chi non idoneo.
+            </div>
+        </div>
+        
+<!-- ADESIONE -->
+<div class="section">
+    <h3>✅ Adesione obbligatoria</h3>
+
+    <div class="alert alert-danger">
+        <span class="alert-icon">⚠️</span>
+        Partecipazione <strong>volontaria</strong> sotto <strong>esclusiva responsabilità</strong> del partecipante.
+    </div>
+
+    <h4>Con l'adesione dichiari di:</h4>
+    <ul>
+        <li>Essere informato su percorso, rischi e difficoltà</li>
+        <li>Essere fisicamente e tecnicamente idoneo</li>
+        <li>Partecipare volontariamente assumendoti ogni responsabilità</li>
+        <li>Seguire itinerario e istruzioni organizzatore</li>
+        <li>Essere consapevole del rischio residuo in ambiente naturale</li>
+        <li>Essere consapevole che i trasferimenti avvengono con mezzi propri, sotto esclusiva responsabilità di ciascun conducente</li>
+    </ul>
+    <p>Trattasi di attività ricreativa tra privati, senza corrispettivo economico e senza guida alpina professionista.</p>
+    <br>
+    <div class="alert alert-warning">
+        <span class="alert-icon">⚠️</span>
+        <strong>Accettazione integrale</strong> di tutte le clausole con compilazione form.
+    </div>
+
+    <p style="text-align:center; margin: 24px 0;">
+        <a id="c-form-button" href="#" target="_blank" rel="noopener" class="button">
+            📝 Compila adesione ora
+        </a>
+    </p>
+
+    <p style="font-size:0.9rem; opacity:0.8; text-align:center;">
+        <em>Risposte private su Google Sheets</em>
+    </p>
+</div>
+
+
+        <!-- FOOTER -->
+        <footer class="page-footer">
+            <p>
+                Organizzata da <strong id="c-organizzatore-footer"></strong>
+                &nbsp;|&nbsp; Attività privata ricreativa
+                &nbsp;|&nbsp; <span id="c-anno-footer"></span>
+                &nbsp;|&nbsp; <a href="#top">↑ Torna su</a>
+            </p>
+        </footer>
+
+    </div><!-- #content -->
+</div><!-- .page-wrapper -->
+
+<script>
+    (function () {
+        if (typeof CONFIG === 'undefined') {
+            document.getElementById('loading').style.display  = 'none';
+            document.getElementById('error-msg').style.display = 'block';
+            return;
+        }
+
+        const c = CONFIG;
+        document.getElementById('loading').style.display  = 'none';
+        document.getElementById('content').style.display  = 'block';
+        document.getElementById('c-dati').innerHTML = [
+            `📍 Tipo: <em>${c.trekking.tipo}</em>`,
+            `📏 Distanza: <em>${c.trekking.km} km</em>`,
+            `⛰️ Dislivello: <em>${c.trekking.dislivello_m} m</em>`,
+            `⏱️ Durata: <em>${c.trekking.durata_stimata}</em>`,
+            `🏔️ Quota max: <em>${c.trekking.quota_max_m} m</em>`,
+            `📊 Difficoltà: <em>${c.trekking.difficolta}</em>` 
+        ].map(e => `<li>${e}</li>`).join('');
+        document.getElementById('page-title').textContent =
+            `Escursione ${c.titolo} – ${c.data}`;
+        document.getElementById('c-data').textContent           = c.data;
+        document.getElementById('c-titolo').textContent         = c.titolo;
+        document.getElementById('c-difficolta-link').href       = c.difficolta_link;
+        document.getElementById('c-incontro').textContent       = `${c.punto_incontro.nome}, ${c.punto_incontro.citta}`;
+        document.getElementById('c-ora-ritrovo').textContent    = c.punto_incontro.ora_ritrovo;
+        document.getElementById('c-ora-partenza').textContent   = c.punto_incontro.ora_partenza;
+        document.getElementById('c-incontro-link').href         = c.punto_incontro.maps_link;
+        document.getElementById('c-incontro-label').textContent = c.punto_incontro.nome;
+        document.getElementById('c-durata-trasferimento').textContent = c.punto_incontro.durata_trasferimento;       
+        document.getElementById('c-ora-trekking').textContent = c.trekking.ora_inizio;
+        document.getElementById('c-osmand-link').href = c.trekking.osmand_link;
+        document.getElementById('c-equipaggiamento').innerHTML =
+            c.equipaggiamento.map(e => `<li>${e}</li>`).join('');
+        document.getElementById('c-parcheggio-label').textContent = c.parcheggio.nome;
+        document.getElementById('c-parcheggio-label-mappa').textContent = c.parcheggio.nome;
+        document.getElementById('c-parcheggio-link').href         = c.parcheggio.maps_link;     
+        document.getElementById('c-incontro-link-mappa').href  = c.punto_incontro.maps_link;
+        document.getElementById('c-parcheggio-link-mappa').href = c.parcheggio.maps_link;
+        document.getElementById('c-form-button').href = c.google_form_embed;
+        document.getElementById('c-organizzatore-footer').textContent = c.organizzatore;
+        document.getElementById('c-anno-footer').textContent          = c.anno;
+
+        // Scala difficoltà
+        // Scala difficoltà 0–8
+const etichette = [
+    "Insignificante (0)",
+    "Basilare (1)",
+    "Facile (2)",
+    "Intermedio (3)",
+    "Selezionata (4)",
+    "Impegnativa (5)",
+    "Difficile (6)",
+    "Molto difficile (7)",
+    "Estremo (8)"
+];
+const livello = c.trekking.difficolta_livello ?? 1;
+const track = document.getElementById('c-diff-track');
+track.innerHTML = '';
+for (let i = 0; i <= 8; i++) {
+    const step = document.createElement('div');
+    step.className = 'diff-step' + (i <= livello ? ` filled-${i}` : '');
+    if (i === livello) step.classList.add('active');
+    step.textContent = i;
+    track.appendChild(step);
+}
+document.getElementById('c-difficolta-text').textContent =
+    etichette[livello] ?? `Livello ${livello}`;
+
+
+    })();
+</script>
+
+</body>
+</html>
